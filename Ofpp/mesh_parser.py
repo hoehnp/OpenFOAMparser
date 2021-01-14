@@ -7,6 +7,7 @@ from __future__ import print_function
 import numpy as np
 import os
 import struct
+from sys import exit
 from collections import namedtuple
 from .field_parser import parse_internal_field, is_binary_format
 
@@ -161,6 +162,21 @@ class FoamMesh(object):
         self.owner = self.parse_mesh_file(os.path.join(path, 'owner'), self.parse_owner_neighbour_content)
         self.neighbour = self.parse_mesh_file(os.path.join(path, 'neighbour'), self.parse_owner_neighbour_content)
 
+
+    def write_mesh_data(self, data):
+        """
+        parse mesh data from mesh files
+        :param path: path of mesh files
+        :return: none
+        """
+        print("writing mesh data")
+        path = self.path
+        self.points = self.parse_mesh_file_write(os.path.join(path, 'points'), 
+                                                  self.parse_write_points_content,
+                                                  data)
+        return None
+
+
     @classmethod
     def parse_mesh_file(cls, fn, parser):
         """
@@ -203,6 +219,72 @@ class FoamMesh(object):
             n += 1
         return None
 
+    @classmethod
+    def parse_mesh_file_write(cls, fn, parser, data):
+        """
+        parse mesh file
+        :param fn: boundary file name
+        :param parser: parser of the mesh
+        :return: mesh data
+        """
+        print("parse_mesh_file_write")
+        try:
+            with open(fn, "rb") as f:
+                content = f.readlines()
+            parser(content, 
+                    data, 
+                    is_binary_format(content), fn
+                  )
+        except FileNotFoundError:
+            print('file not found: %s'%fn)
+            return None
+
+    @classmethod
+    def parse_write_points_content(cls, content, newdata, is_binary, fn,  skip=10):
+        """
+        parse points from content added by JW
+        :param content: file contents
+        :param is_binary: binary format or not
+        :param fn: points file name
+        :param skip: skip lines
+        :return: points coordinates as numpy.array
+        """
+        numFound = False
+        pointsDone = False
+
+        print("rewriting", fn)
+        with open(fn, "w") as f:
+          strfmt = str.maketrans('[]','()')
+          for i in range(skip):
+            f.write(content[i].decode('utf-8'))
+          n = skip
+          while n < len(content):
+            lc = content[n]
+            if not pointsDone:
+                if is_integer(lc):
+                    num = int(lc)
+                    numStr = str(lc)+"\n(\n"
+                    f.write(lc.decode('utf-8'))
+                    n += 1
+                    f.write(content[n].decode('utf-8'))
+                    numFound = True
+                    n += 1
+                elif not is_integer(lc) and numFound:  
+                    for i in range(newdata.shape[0]):
+                        data = newdata[i]
+                        datafmt = np.array2string(data, separator=" ")
+                        lineOut = datafmt.translate(strfmt)+"\n"
+                        f.write(lineOut)
+                        n += 1
+                    pointsDone = True
+                elif not is_integer(lc) and not numFound:
+                    f.write(content[n].decode('utf-8'))
+                    n += 1
+            else:
+                f.write(content[n].decode('utf-8'))
+                n += 1
+
+        return None
 
     @classmethod
     def parse_owner_neighbour_content(cls, content, is_binary, skip=10):
