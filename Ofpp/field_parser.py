@@ -214,3 +214,79 @@ def is_binary_format(content, maxline=20):
                 return True
             return False
     return False
+
+
+def write_field_data(data, fn):
+    """
+    parse field data from mesh files
+    :param data: cell data to write
+    :param fn: path to field file
+    :return: none
+    """
+    points = parse_mesh_file_write(fn 
+                                      parse_write_points_content,
+                                      data)
+    return None
+
+def parse_field_file_write(fn, parser, data):
+    """
+    parse mesh file
+    :param fn: boundary file name
+    :param parser: parser of the mesh
+    :return: mesh data
+    """
+    try:
+        with open(fn, "rb") as f:
+            content = f.readlines()
+        parser(content, 
+                data, 
+                is_binary_format(content), fn
+              )
+    except FileNotFoundError:
+        print('file not found: %s'%fn)
+        return None
+
+def parse_write_points_content(content, newdata, is_binary, fn,  skip=10):
+    """
+    parse points from content added by JW
+    :param content: file contents
+    :param is_binary: binary format or not
+    :param fn: points file name
+    :param skip: skip lines
+    :return: none
+    """
+    numFound = False
+    pointsDone = False
+
+    with open(fn, "w") as f:
+      strfmt = str.maketrans('[]','()')
+      for i in range(skip):
+        f.write(content[i].decode('utf-8'))
+      n = skip
+      while n < len(content):
+        lc = content[n]
+        if not pointsDone:
+            if is_integer(lc):
+                num = int(lc)
+                numStr = str(lc)+"\n(\n"
+                f.write(lc.decode('utf-8'))
+                n += 1
+                f.write(content[n].decode('utf-8'))
+                numFound = True
+                n += 1
+            elif not is_integer(lc) and numFound:  
+                for i in range(newdata.shape[0]):
+                    data = newdata[i]
+                    datafmt = np.array2string(data, separator=" ")
+                    lineOut = datafmt.translate(strfmt)+"\n"
+                    f.write(lineOut)
+                    n += 1
+                pointsDone = True
+            elif not is_integer(lc) and not numFound:
+                f.write(content[n].decode('utf-8'))
+                n += 1
+        else:
+            f.write(content[n].decode('utf-8'))
+            n += 1
+
+    return None

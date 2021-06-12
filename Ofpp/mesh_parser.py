@@ -169,7 +169,6 @@ class FoamMesh(object):
         :param path: path of mesh files
         :return: none
         """
-        print("writing mesh data")
         path = self.path
         self.points = self.parse_mesh_file_write(os.path.join(path, 'points'), 
                                                   self.parse_write_points_content,
@@ -227,7 +226,6 @@ class FoamMesh(object):
         :param parser: parser of the mesh
         :return: mesh data
         """
-        print("parse_mesh_file_write")
         try:
             with open(fn, "rb") as f:
                 content = f.readlines()
@@ -247,7 +245,7 @@ class FoamMesh(object):
         :param is_binary: binary format or not
         :param fn: points file name
         :param skip: skip lines
-        :return: points coordinates as numpy.array
+        :return: none
         """
         numFound = False
         pointsDone = False
