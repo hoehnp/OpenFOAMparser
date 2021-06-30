@@ -122,10 +122,26 @@ def parse_data_nonuniform(content, n, n2, is_binary):
     """
     num = int(content[n + 1])
     if not is_binary:
+        nn = 1
+        if b'vector' in content[n]:
+            nn = 3
+        elif b'symmtensor' in content[n]:
+            nn = 6
+        elif b'tensor' in content[n]:
+            nn = 9
         if b'scalar' in content[n]:
             data = np.array([float(x) for x in content[n + 3:n + 3 + num]])
         else:
             data = np.array([ln[1:-2].split() for ln in content[n + 3:n + 3 + num]], dtype=float)
+
+        # reshape if tensor
+        if nn == 9:
+            data = data.reshape((num, 3, 3))
+        elif nn == 6:
+            # use symm part to make full tensor
+            data = data[:,[0,1,2,1,3,4,2,4,5]]
+            # then reshape
+            data = data.reshape((num, 3, 3))        
     else:
         nn = 1
         if b'vector' in content[n]:
