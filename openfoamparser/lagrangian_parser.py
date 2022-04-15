@@ -91,6 +91,7 @@ def parse_data_nonuniform(content, n, n2, is_binary, max_num_p):
             tmpStr = content[n+3].replace(b'(', b'').replace(b')', b'')
             data = np.array([ln[:-1].replace(b'(', b'').replace(b')', b'').split()
                                 for ln in content[n + 2:n + 2 + num]], dtype=float)
+        return data
     else:
         print("binary not supported")
         return np.ones(max_num_p)*np.nan
