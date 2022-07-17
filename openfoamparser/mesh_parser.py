@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import numpy as np
 import os
+import re
 import struct
 from sys import exit
 from collections import namedtuple
@@ -139,7 +140,7 @@ class FoamMesh(object):
         construct cell faces, cell neighbours
         :return: none
         """
-        cell_num = max(self.owner) + 1
+        cell_num = max(max(self.owner), max(self.neighbour)) + 1
         self.cell_faces = [[] for i in range(cell_num)]
         self.cell_neighbour = [[] for i in range(cell_num)]
         for i, n in enumerate(self.owner):
@@ -324,7 +325,7 @@ class FoamMesh(object):
             if is_integer(lc):
                 num = int(lc)
                 if not is_binary:
-                    data = [[int(s) for s in ln[2:-2].split()] for ln in content[n + 2:n + 2 + num]]
+                    data = [[int(s) for s in re.findall(b"\d+", ln)[1:]] for ln in content[n + 2:n + 2 + num]]
                 else:
                     buf = b''.join(content[n+1:])
                     disp = struct.calcsize('c')
