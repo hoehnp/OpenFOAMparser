@@ -24,8 +24,8 @@ def is_integer(s):
 
 class FoamMesh(object):
     """ FoamMesh class """
-    def __init__(self, path):
-        self.path = os.path.join(path, "constant/polyMesh/")
+    def __init__(self, path, region=''):
+        self.path = os.path.join(path, "constant", region,"polyMesh/")
         self._parse_mesh_data(self.path)
         self.num_point = len(self.points)
         self.num_face = len(self.owner)
