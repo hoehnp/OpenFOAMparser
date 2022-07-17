@@ -125,7 +125,7 @@ def parse_data_nonuniform(content, n, n2, is_binary):
         nn = 1
         if b'vector' in content[n]:
             nn = 3
-        elif b'symmtensor' in content[n]:
+        elif b'symmTensor' in content[n]:
             nn = 6
         elif b'tensor' in content[n]:
             nn = 9
@@ -146,7 +146,7 @@ def parse_data_nonuniform(content, n, n2, is_binary):
         nn = 1
         if b'vector' in content[n]:
             nn = 3
-        elif b'symmtensor' in content[n]:
+        elif b'symmTensor' in content[n]:
             nn = 6
         elif b'tensor' in content[n]:
             nn = 9

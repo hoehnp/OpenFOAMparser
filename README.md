@@ -208,16 +208,6 @@ array([  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,
 >>>
 ```
 
-### lagrangian data
-
-View particle statistics
-```python
-from Ofpp import lagrangian_parser as lp
-
-up = lp.parse_lagrangian_field('1/lagrangian/kinematicCloud/U')
-up.mean()
-```
-
 ### mesh
 
 Create a FoamMesh object and read mesh file.
@@ -268,41 +258,18 @@ False
 False
 ```
 
-Overwrite mesh vertices. This is useful for assigning complex spacing such as polynomial spacing in channel flow to compare with benchmarks.
-```python
-from Ofpp import mesh_parser as mp
-
-def chebychev(i,n):
-  return np.cos((2*i + 1)*np.pi/(2*n))
-
-m = mp.FoamMesh('.')
-i = m.points*1000 #-floating point handling better with this
-origin = i.copy()
-h = i[:,2].max() #0.02
-
-z = np.unique(i[:,2])
-
-N = z.size
-z_new = np.ones(N)
-z_new[0] = -1
-for ind in range(1,N-1):
-  z_new[ind] = chebychev(ind, N)*-1
-z_new[-1] = 1
-z_new += 1 
-z_new /= 2
-z_new *= h
-
-for row in range(N):
-  zOut = np.where(i[:,2]==z[row])
-  i[zOut,2] = z_new[row]
-
-m.write_mesh_data(i/1000)
-```
 
 
-
-## Author
+## Authors
 
 XU Xianghua <dayigu at gmail dot com>
 
-Josh Williams <jw144 at hw dot ac dot uk>
+Jan Drees <jdrees at mail dot uni-paderborn dot de>
+
+Timothy-Edward-Kendon
+
+YuyangL
+
+Josh Williams 
+
+Patrick Hohn
